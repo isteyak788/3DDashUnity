@@ -1,1 +1,58 @@
-"ForwardDash" for handling the forward dash functionality
+using UnityEngine;
+using System.Collections;
+
+public class ForwardDash : MonoBehaviour
+{
+    public float forwardDashSpeed = 10.0f;
+    public bool canForwardDash = true;
+    public float forwardRotationSmoothness = 10.0f;
+    public float forwardGraceTime = 0.1f;
+    public float forwardDashTime = 0.5f;
+    public float forwardDashCooldown = 2.0f;
+
+    private CharacterController controller;
+    private bool isDashing;
+    private float initialYRotation;
+    private float targetYRotation;
+    private float lastForwardDashTime;
+
+    // Add other necessary variables and methods here
+
+    private void Awake()
+    {
+        controller = GetComponent<CharacterController>();
+        isDashing = false;
+        // Initialize other variables
+    }
+
+    private void Update()
+    {
+        // Forward dash code here
+    }
+
+    private IEnumerator PerformForwardDash()
+    {
+        isDashing = true;
+        lastForwardDashTime = Time.time;
+
+        // Capture initial position and rotation
+        Vector3 startPosition = transform.position;
+        float startTime = Time.time;
+
+        Vector3 dashDirection = playerCamera.forward;
+        dashDirection.y = 0.0f;
+
+        initialYRotation = transform.rotation.eulerAngles.y;
+        targetYRotation = Quaternion.LookRotation(dashDirection).eulerAngles.y;
+
+        while (Time.time - startTime < forwardDashTime)
+        {
+            float currentYRotation = Mathf.LerpAngle(initialYRotation, targetYRotation, (Time.time - startTime) / forwardDashTime);
+            transform.rotation = Quaternion.Euler(0, currentYRotation, 0);
+            controller.Move(dashDirection.normalized * forwardDashSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        isDashing = false;
+    }
+}
